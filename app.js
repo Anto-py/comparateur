@@ -41,7 +41,7 @@ document.querySelectorAll('.tab').forEach((tab) => {
 
 /* ============ Onglet 1 : la frise ============ */
 
-const etat = { file: [], justes: 0, rates: 0, essais: 0, anime: false, vientDeGlisser: false };
+const etat = { file: [], justes: 0, rates: 0, essais: 0, vientDeGlisser: false };
 
 function melanger(tableau) {
   const t = tableau.slice();
@@ -91,8 +91,8 @@ function majScore() {
 
 function afficherPioche() {
   const pioche = $('#pioche');
-  // Filet : aucun clone de glissé ne doit survivre à un redessin.
-  document.querySelectorAll('.carte.is-dragging').forEach((c) => c.remove());
+  // Un redessin annule tout geste en cours : la carte glissée n'existe plus.
+  nettoyerGlisser();
   pioche.innerHTML = '';
   const carte = carteCourante();
 
@@ -123,7 +123,7 @@ function afficherPioche() {
 
 function deposer(palierChoisi) {
   const carte = carteCourante();
-  if (!carte || etat.anime) return;
+  if (!carte) return;
 
   const iChoisi = PALIERS.findIndex((p) => p.id === palierChoisi);
   const iJuste = PALIERS.findIndex((p) => p.id === carte.palier);
@@ -157,18 +157,15 @@ function refuser(palierChoisi, versLeHaut) {
 
   // La carte s'en retourne sur le paquet, puis en ressort : l'élève voit
   // qu'elle lui est rendue plutôt que de la retrouver posée quelque part.
+  // L'animation n'est que du décor : elle ne verrouille jamais l'essai suivant.
+  // Un élève qui réessaie aussitôt doit être entendu, pas ignoré.
   const carteEl = document.querySelector('#pioche .carte');
   const sobre = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (carteEl && !sobre) {
-    etat.anime = true;
+    carteEl.classList.remove('is-retour');
+    void carteEl.offsetWidth;          // force le redémarrage de l'animation
     carteEl.classList.add('is-retour');
-    const fin = () => {
-      carteEl.classList.remove('is-retour');
-      etat.anime = false;
-      carteEl.removeEventListener('animationend', fin);
-    };
-    carteEl.addEventListener('animationend', fin);
-    setTimeout(fin, 900);              // filet si l'animation est désactivée
+    carteEl.addEventListener('animationend', () => carteEl.classList.remove('is-retour'), { once: true });
   }
 
   const fb = $('#feedback');
@@ -215,56 +212,79 @@ function revelation() {
 }
 
 /* Glisser-déposer au pointeur : marche à la souris comme au doigt.
-   Un déplacement de moins de 8 px est traité comme un simple clic. */
+   Un déplacement de moins de 8 px est traité comme un simple clic.
+
+   L'état du geste vit ici, en un seul endroit, et non dans une closure par carte :
+   un geste peut mourir sans jamais rendre la main à la carte qui l'a démarré
+   (capture du pointeur perdue, geste système, fenêtre quittée). Le clone qui suit
+   le doigt resterait alors figé en position fixed au milieu de la page. D'où la
+   règle : la fin d'un geste se nettoie par le DOM, jamais par la seule référence. */
+let glisse = null;
+
 function activerGlisser(el) {
-  let fantome = null;
-  let depart = null;
-
   el.addEventListener('pointerdown', (ev) => {
-    depart = { x: ev.clientX, y: ev.clientY };
-    el.setPointerCapture(ev.pointerId);
-  });
-
-  el.addEventListener('pointermove', (ev) => {
-    if (!depart) return;
-    const dist = Math.hypot(ev.clientX - depart.x, ev.clientY - depart.y);
-    if (dist < 8) return;
-
-    if (!fantome) {
-      const r = el.getBoundingClientRect();
-      fantome = el.cloneNode(true);
-      fantome.classList.add('is-dragging');
-      fantome.style.width = r.width + 'px';
-      document.body.appendChild(fantome);
-      el.style.opacity = '0.35';
-    }
-    fantome.style.left = (ev.clientX - 60) + 'px';
-    fantome.style.top = (ev.clientY - 30) + 'px';
-
-    document.querySelectorAll('.colonne').forEach((c) => c.classList.remove('is-target'));
-    const cible = colonneSous(ev.clientX, ev.clientY);
-    if (cible) cible.classList.add('is-target');
-  });
-
-  el.addEventListener('pointerup', (ev) => {
-    document.querySelectorAll('.colonne').forEach((c) => c.classList.remove('is-target'));
-    if (fantome) {
-      fantome.remove();
-      fantome = null;
-      el.style.opacity = '';
-      etat.vientDeGlisser = true;
-      setTimeout(() => { etat.vientDeGlisser = false; }, 0);
-      const cible = colonneSous(ev.clientX, ev.clientY);
-      if (cible) deposer(cible.dataset.palier);
-    }
-    depart = null;
-  });
-
-  el.addEventListener('pointercancel', () => {
-    if (fantome) { fantome.remove(); fantome = null; el.style.opacity = ''; }
-    depart = null;
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;   // bouton principal seulement
+    nettoyerGlisser();
+    el.classList.remove('is-retour');    // un nouveau geste prime sur l'animation en cours
+    glisse = { el, id: ev.pointerId, x: ev.clientX, y: ev.clientY, fantome: null };
+    // La capture garde les mouvements sur la carte quand le pointeur la quitte.
+    // Elle peut être refusée ou reprise par le navigateur : les filets ci-dessous en tiennent lieu.
+    try { el.setPointerCapture(ev.pointerId); } catch (_) { /* on suivra sans capture */ }
+    ev.preventDefault();                 // pas de glisser natif ni de sélection parasite
   });
 }
+
+/** Termine proprement un geste, qu'il ait abouti ou non. */
+function nettoyerGlisser() {
+  document.querySelectorAll('.carte.is-dragging').forEach((c) => c.remove());
+  document.querySelectorAll('.colonne.is-target').forEach((c) => c.classList.remove('is-target'));
+  document.querySelectorAll('#pioche .carte').forEach((c) => { c.style.opacity = ''; });
+  if (glisse && glisse.el.hasPointerCapture && glisse.el.hasPointerCapture(glisse.id)) {
+    glisse.el.releasePointerCapture(glisse.id);
+  }
+  glisse = null;
+}
+
+window.addEventListener('pointermove', (ev) => {
+  if (!glisse || ev.pointerId !== glisse.id) return;
+
+  if (!glisse.fantome) {
+    if (Math.hypot(ev.clientX - glisse.x, ev.clientY - glisse.y) < 8) return;
+    const r = glisse.el.getBoundingClientRect();
+    const f = glisse.el.cloneNode(true);
+    f.classList.add('is-dragging');
+    f.style.width = r.width + 'px';
+    document.body.appendChild(f);
+    glisse.el.style.opacity = '0.35';
+    glisse.fantome = f;
+  }
+  glisse.fantome.style.left = (ev.clientX - 60) + 'px';
+  glisse.fantome.style.top = (ev.clientY - 30) + 'px';
+
+  document.querySelectorAll('.colonne').forEach((c) => c.classList.remove('is-target'));
+  const cible = colonneSous(ev.clientX, ev.clientY);
+  if (cible) cible.classList.add('is-target');
+});
+
+window.addEventListener('pointerup', (ev) => {
+  if (!glisse || ev.pointerId !== glisse.id) return;
+  const glisseEffectif = Boolean(glisse.fantome);
+  nettoyerGlisser();                     // le fantôme part avant qu'on regarde ce qu'il y a dessous
+  if (!glisseEffectif) return;           // simple clic : c'est la colonne qui s'en charge
+
+  etat.vientDeGlisser = true;
+  setTimeout(() => { etat.vientDeGlisser = false; }, 0);
+  const cible = colonneSous(ev.clientX, ev.clientY);
+  if (cible) deposer(cible.dataset.palier);
+});
+
+window.addEventListener('pointercancel', (ev) => {
+  if (glisse && ev.pointerId === glisse.id) nettoyerGlisser();
+});
+
+// Derniers filets : un geste peut mourir sans pointerup du tout.
+window.addEventListener('blur', nettoyerGlisser);
+document.addEventListener('visibilitychange', () => { if (document.hidden) nettoyerGlisser(); });
 
 function colonneSous(x, y) {
   const sous = document.elementFromPoint(x, y);
