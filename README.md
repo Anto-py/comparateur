@@ -1,5 +1,7 @@
 # Le comparateur — combien pèse une intelligence artificielle ?
 
+**En ligne : https://anto-py.github.io/comparateur/**
+
 Activité web pour la classe. En deux temps :
 
 1. **Ranger les chiffres.** Treize cartes portant un chiffre réel de consommation électrique liée à l'IA, à ranger sur une frise de cinq paliers, du wattheure au térawattheure. D'un palier à l'autre, on multiplie par mille. Chaque carte affiche sa source, sa date et son statut : mesuré et relu par des scientifiques, déclaré par l'entreprise concernée, ou estimé par un tiers.
