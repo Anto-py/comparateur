@@ -41,7 +41,7 @@ document.querySelectorAll('.tab').forEach((tab) => {
 
 /* ============ Onglet 1 : la frise ============ */
 
-const etat = { file: [], justes: 0, rates: 0, essais: 0 };
+const etat = { file: [], justes: 0, rates: 0, essais: 0, anime: false, vientDeGlisser: false };
 
 function melanger(tableau) {
   const t = tableau.slice();
@@ -67,7 +67,12 @@ function construireFrise() {
       </div>
       ${i > 0 ? '<div class="col-facteur">× 1 000</div>' : ''}
       <div class="col-contenu"></div>`;
-    col.addEventListener('click', () => deposer(p.id));
+    // Un glisser-déposer est suivi d'un clic synthétique : sans ce garde-fou,
+    // le même geste compterait deux dépôts.
+    col.addEventListener('click', () => {
+      if (etat.vientDeGlisser) return;
+      deposer(p.id);
+    });
     frise.appendChild(col);
   });
 }
@@ -76,20 +81,32 @@ function carteCourante() {
   return etat.file[0] || null;
 }
 
-function afficherPioche() {
-  const pioche = $('#pioche');
-  pioche.innerHTML = '';
-  const carte = carteCourante();
-
+function majScore() {
   $('#score-restantes').textContent = etat.file.length;
   $('#score-justes').textContent = etat.justes;
   $('#score-rates').textContent = etat.rates;
+  const nb = document.querySelector('.paquet-nb');
+  if (nb) nb.textContent = Math.max(0, etat.file.length - 1);
+}
+
+function afficherPioche() {
+  const pioche = $('#pioche');
+  // Filet : aucun clone de glissé ne doit survivre à un redessin.
+  document.querySelectorAll('.carte.is-dragging').forEach((c) => c.remove());
+  pioche.innerHTML = '';
+  const carte = carteCourante();
 
   if (!carte) {
+    majScore();
     pioche.innerHTML = '<p class="carte-restantes">Toutes les cartes sont placées.</p>';
     revelation();
     return;
   }
+
+  const paquet = document.createElement('div');
+  paquet.className = 'paquet';
+  paquet.innerHTML = '<span class="paquet-nb">0</span><span class="paquet-lab">en réserve</span>';
+  pioche.appendChild(paquet);
 
   // Le chiffre est nu : sans son unité, il ne trahit pas l'échelle.
   // C'est ce que la carte décrit qui doit guider l'élève, pas le nombre.
@@ -101,27 +118,23 @@ function afficherPioche() {
     <span class="statut ${LABELS_STATUT[carte.statut].classe}">${LABELS_STATUT[carte.statut].texte}</span>`;
   activerGlisser(el);
   pioche.appendChild(el);
-
-  const compteur = document.createElement('p');
-  compteur.className = 'carte-restantes';
-  compteur.textContent = `${etat.file.length} carte${etat.file.length > 1 ? 's' : ''} en main`;
-  pioche.appendChild(compteur);
+  majScore();
 }
 
 function deposer(palierChoisi) {
   const carte = carteCourante();
-  if (!carte) return;
+  if (!carte || etat.anime) return;
 
   const iChoisi = PALIERS.findIndex((p) => p.id === palierChoisi);
   const iJuste = PALIERS.findIndex((p) => p.id === carte.palier);
 
-  // Mauvaise colonne : la carte est refusée et revient en main, avec le seul
-  // indice du sens. On ne dit pas de combien : ce serait donner la réponse.
+  // Mauvaise colonne : la carte est refusée et retourne sur le paquet, avec le
+  // seul indice du sens. On ne dit pas de combien : ce serait donner la réponse.
   if (iChoisi !== iJuste) {
     etat.rates++;
     etat.essais++;
     refuser(palierChoisi, iJuste > iChoisi);
-    afficherPioche();
+    majScore();
     return;
   }
 
@@ -141,11 +154,28 @@ function refuser(palierChoisi, versLeHaut) {
     void col.offsetWidth;              // force le redémarrage de l'animation
     col.classList.add('is-refus');
   }
+
+  // La carte s'en retourne sur le paquet, puis en ressort : l'élève voit
+  // qu'elle lui est rendue plutôt que de la retrouver posée quelque part.
+  const carteEl = document.querySelector('#pioche .carte');
+  const sobre = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (carteEl && !sobre) {
+    etat.anime = true;
+    carteEl.classList.add('is-retour');
+    const fin = () => {
+      carteEl.classList.remove('is-retour');
+      etat.anime = false;
+      carteEl.removeEventListener('animationend', fin);
+    };
+    carteEl.addEventListener('animationend', fin);
+    setTimeout(fin, 900);              // filet si l'animation est désactivée
+  }
+
   const fb = $('#feedback');
   fb.className = 'feedback rate';
   fb.innerHTML = versLeHaut
-    ? "<strong>Refusé, c'est plus.</strong> Vise une échelle plus grande."
-    : "<strong>Refusé, c'est moins.</strong> Vise une échelle plus petite.";
+    ? "<strong>Refusé, c'est plus.</strong> La carte retourne sur le paquet. Vise une échelle plus grande."
+    : "<strong>Refusé, c'est moins.</strong> La carte retourne sur le paquet. Vise une échelle plus petite.";
 }
 
 function placerDansColonne(carte) {
@@ -222,6 +252,8 @@ function activerGlisser(el) {
       fantome.remove();
       fantome = null;
       el.style.opacity = '';
+      etat.vientDeGlisser = true;
+      setTimeout(() => { etat.vientDeGlisser = false; }, 0);
       const cible = colonneSous(ev.clientX, ev.clientY);
       if (cible) deposer(cible.dataset.palier);
     }
