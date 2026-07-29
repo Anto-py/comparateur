@@ -27,14 +27,14 @@
   <section class="panel is-active" id="panel-frise" role="tabpanel" aria-labelledby="tab-frise">
 
     <div class="consigne">
-      <p><strong>La consigne.</strong> Chaque carte porte un chiffre réel, avec sa source. Range-la dans la bonne colonne : du wattheure, l'échelle d'un geste, au térawattheure, l'échelle d'un pays. <strong>D'une colonne à l'autre, on multiplie par mille.</strong></p>
-      <p class="consigne-aide">Les cartes arrivent une par une. Clique la colonne où tu la ranges, ou fais-la glisser jusque-là.</p>
+      <p><strong>La consigne.</strong> Chaque carte porte un chiffre réel, mais <strong>sans son unité</strong> : à toi de trouver l'échelle à partir de ce que la carte décrit. Du wattheure, l'échelle d'un geste, au térawattheure, l'échelle d'un pays. <strong>D'une colonne à l'autre, on multiplie par mille.</strong></p>
+      <p class="consigne-aide">Les cartes arrivent une par une. Clique la colonne où tu la ranges, ou fais-la glisser jusque-là. Si tu te trompes, la carte t'est rendue et tu sais seulement si c'est plus ou si c'est moins.</p>
     </div>
 
     <div class="scoreboard">
       <div class="score-item"><span class="score-val" id="score-restantes">12</span><span class="score-lab">cartes en main</span></div>
       <div class="score-item"><span class="score-val" id="score-justes">0</span><span class="score-lab">justes du premier coup</span></div>
-      <div class="score-item"><span class="score-val" id="score-ecart">0</span><span class="score-lab">crans d'erreur</span></div>
+      <div class="score-item"><span class="score-val" id="score-rates">0</span><span class="score-lab">cartes refusées</span></div>
       <button class="retro-btn-pill" id="btn-reset"><span class="label">Recommencer</span><span class="icon">↺</span></button>
     </div>
 
@@ -99,10 +99,6 @@
         </div>
         <p class="res-compar" id="res-compar">—</p>
       </div>
-    </div>
-
-    <div class="garde-fou">
-      <p><strong>Ce que ce calcul ne dit pas.</strong> Il ne dit pas que poser une question à une IA est un crime écologique : une requête pèse l'équivalent de deux minutes d'ampoule. Il dit qu'un geste minuscule, multiplié par des centaines de millions de personnes, jour et nuit, cesse d'être minuscule. On apprend l'échelle, pas la culpabilité.</p>
     </div>
 
   </section>

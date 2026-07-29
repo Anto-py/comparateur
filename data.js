@@ -55,6 +55,7 @@ const CARTES = [
   {
     id: 'gemini',
     titre: 'Un prompt texte à Gemini',
+    nombre: '0,24',
     valeur: '0,24 Wh',
     wh: 0.24,
     palier: 'wh',
@@ -66,6 +67,7 @@ const CARTES = [
   {
     id: 'google',
     titre: 'Une recherche Google',
+    nombre: '0,3',
     valeur: '0,3 Wh',
     wh: 0.3,
     palier: 'wh',
@@ -77,6 +79,7 @@ const CARTES = [
   {
     id: 'chatgpt',
     titre: 'Un prompt texte à ChatGPT',
+    nombre: '0,34',
     valeur: '0,34 Wh',
     wh: 0.34,
     palier: 'wh',
@@ -88,6 +91,7 @@ const CARTES = [
   {
     id: 'requete_epri',
     titre: 'Une requête à une IA générative',
+    nombre: '2,9',
     valeur: '2,9 Wh',
     wh: 2.9,
     palier: 'wh',
@@ -99,6 +103,7 @@ const CARTES = [
   {
     id: 'image',
     titre: 'Une image générée par IA',
+    nombre: '2,9 en moyenne, jusqu\'à 11,5',
     valeur: '2,9 Wh en moyenne, jusqu\'à 11,5 Wh',
     wh: 2.9,
     palier: 'wh',
@@ -110,6 +115,7 @@ const CARTES = [
   {
     id: 'video',
     titre: 'Une vidéo IA de 5 secondes',
+    nombre: '944',
     valeur: '944 Wh',
     wh: 944,
     palier: 'wh',
@@ -121,6 +127,7 @@ const CARTES = [
   {
     id: 'seconde',
     titre: 'Une seconde de ChatGPT dans le monde',
+    nombre: 'entre 7 et 84',
     valeur: 'entre 7 et 84 kWh',
     wh: 8.4e4,
     palier: 'kwh',
@@ -132,6 +139,7 @@ const CARTES = [
   {
     id: 'heure',
     titre: 'Une heure de ChatGPT dans le monde',
+    nombre: 'entre 25 et 302',
     valeur: 'entre 25 et 302 MWh',
     wh: 1.6e8,
     palier: 'mwh',
@@ -143,6 +151,7 @@ const CARTES = [
   {
     id: 'gpt3',
     titre: 'Entraîner GPT-3, une seule fois',
+    nombre: '1 287',
     valeur: '1 287 MWh, soit 1,3 GWh, et 552 tonnes de CO₂',
     wh: 1.287e9,
     palier: 'gwh',
@@ -154,6 +163,7 @@ const CARTES = [
   {
     id: 'gpt4',
     titre: 'Entraîner GPT-4',
+    nombre: '50 000',
     valeur: '50 000 MWh, soit 50 GWh',
     wh: 5e10,
     palier: 'gwh',
@@ -165,6 +175,7 @@ const CARTES = [
   {
     id: 'google_groupe',
     titre: 'Google, toute l\'entreprise, en un an',
+    nombre: '43,6',
     valeur: '43,6 TWh',
     wh: 4.36e13,
     palier: 'twh',
@@ -176,6 +187,7 @@ const CARTES = [
   {
     id: 'dc_2024',
     titre: 'Tous les data centers du monde, en 2024',
+    nombre: '415',
     valeur: '415 TWh',
     wh: 4.15e14,
     palier: 'twh',
@@ -187,6 +199,7 @@ const CARTES = [
   {
     id: 'dc_2030',
     titre: 'Tous les data centers du monde, prévu pour 2030',
+    nombre: '945',
     valeur: '945 TWh',
     wh: 9.45e14,
     palier: 'twh',

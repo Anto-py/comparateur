@@ -202,6 +202,17 @@ body {
   margin-top: 5px;
   line-height: 1.1;
 }
+/* L'unité manquante, matérialisée : c'est elle que l'élève doit trouver. */
+.carte-unite {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 10px;
+  border: 2px dashed var(--retro-teal);
+  border-radius: 6px;
+  color: var(--retro-teal);
+  font-size: 1.1rem;
+  vertical-align: 2px;
+}
 .carte-restantes {
   font-family: 'Oswald', sans-serif;
   font-size: 0.7rem;
@@ -256,6 +267,16 @@ body {
   min-height: 260px;
 }
 .colonne.is-target { border-style: solid; border-color: var(--retro-orange); background: rgba(228,99,46,0.1); }
+.colonne.is-refus { animation: refus 0.45s ease; }
+@keyframes refus {
+  0%, 100% { transform: translateX(0); background: rgba(18,118,118,0.06); }
+  15%      { transform: translateX(-6px); background: rgba(228,99,46,0.22); }
+  45%      { transform: translateX(6px);  background: rgba(228,99,46,0.22); }
+  75%      { transform: translateX(-3px); background: rgba(228,99,46,0.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .colonne.is-refus { animation: none; background: rgba(228,99,46,0.18); }
+}
 .col-tete { text-align: center; padding-bottom: 8px; border-bottom: 2px solid var(--retro-teal); margin-bottom: 10px; }
 .col-symbole { font-family: 'Anton', sans-serif; font-size: 1.6rem; color: var(--retro-teal); line-height: 1; }
 .col-intitule {
@@ -288,7 +309,6 @@ body {
   padding: 8px 10px;
   font-size: 0.75rem;
 }
-.placee.faux { border-color: var(--retro-orange); border-left-color: var(--retro-orange); }
 .placee-titre { font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 0.68rem; line-height: 1.2; }
 .placee-valeur { font-family: 'Anton', sans-serif; color: var(--retro-orange); font-size: 0.95rem; margin-top: 2px; }
 .placee-trad { margin-top: 4px; color: rgba(13,22,23,0.8); line-height: 1.35; }
@@ -391,15 +411,6 @@ input[type=range] { width: 100%; margin-top: 8px; accent-color: var(--retro-oran
   border-radius: 8px;
   background: var(--retro-paper);
   font-family: 'Oswald', sans-serif;
-  font-size: 0.9rem;
-}
-
-.garde-fou {
-  margin-top: 24px;
-  background: rgba(227,165,53,0.18);
-  border-left: 5px solid var(--retro-jaune);
-  padding: 14px 18px;
-  border-radius: 0 10px 10px 0;
   font-size: 0.9rem;
 }
 

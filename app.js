@@ -15,9 +15,6 @@ function formatWh(wh) {
   return nf(wh / 1e12, 1) + ' TWh';
 }
 
-/** Un cran de la frise vaut un facteur mille : on le dit en mots. */
-const FACTEURS = ['', 'mille', 'un million', 'un milliard', 'mille milliards'];
-
 const MENAGE_BELGE_WH = 3.5e6;   // 3 500 kWh par an
 const CHARGE_TEL_WH   = 15;
 const LESSIVE_WH      = 800;
@@ -44,7 +41,7 @@ document.querySelectorAll('.tab').forEach((tab) => {
 
 /* ============ Onglet 1 : la frise ============ */
 
-const etat = { file: [], justes: 0, ecart: 0 };
+const etat = { file: [], justes: 0, rates: 0, essais: 0 };
 
 function melanger(tableau) {
   const t = tableau.slice();
@@ -86,7 +83,7 @@ function afficherPioche() {
 
   $('#score-restantes').textContent = etat.file.length;
   $('#score-justes').textContent = etat.justes;
-  $('#score-ecart').textContent = etat.ecart;
+  $('#score-rates').textContent = etat.rates;
 
   if (!carte) {
     pioche.innerHTML = '<p class="carte-restantes">Toutes les cartes sont placées.</p>';
@@ -94,11 +91,13 @@ function afficherPioche() {
     return;
   }
 
+  // Le chiffre est nu : sans son unité, il ne trahit pas l'échelle.
+  // C'est ce que la carte décrit qui doit guider l'élève, pas le nombre.
   const el = document.createElement('article');
   el.className = 'carte is-held';
   el.innerHTML = `
     <h3 class="carte-titre">${carte.titre}</h3>
-    <p class="carte-valeur">${carte.valeur}</p>
+    <p class="carte-valeur">${carte.nombre}<span class="carte-unite">?</span></p>
     <span class="statut ${LABELS_STATUT[carte.statut].classe}">${LABELS_STATUT[carte.statut].texte}</span>`;
   activerGlisser(el);
   pioche.appendChild(el);
@@ -115,22 +114,44 @@ function deposer(palierChoisi) {
 
   const iChoisi = PALIERS.findIndex((p) => p.id === palierChoisi);
   const iJuste = PALIERS.findIndex((p) => p.id === carte.palier);
-  const ecart = Math.abs(iChoisi - iJuste);
-  const juste = ecart === 0;
 
-  if (juste) etat.justes++;
-  etat.ecart += ecart;
+  // Mauvaise colonne : la carte est refusée et revient en main, avec le seul
+  // indice du sens. On ne dit pas de combien : ce serait donner la réponse.
+  if (iChoisi !== iJuste) {
+    etat.rates++;
+    etat.essais++;
+    refuser(palierChoisi, iJuste > iChoisi);
+    afficherPioche();
+    return;
+  }
+
+  if (etat.essais === 0) etat.justes++;
+  etat.essais = 0;
   etat.file.shift();
 
-  placerDansColonne(carte, juste);
-  afficherFeedback(carte, juste, ecart, iChoisi, iJuste);
+  placerDansColonne(carte);
+  afficherFeedback(carte);
   afficherPioche();
 }
 
-function placerDansColonne(carte, juste) {
+function refuser(palierChoisi, versLeHaut) {
+  const col = document.querySelector(`.colonne[data-palier="${palierChoisi}"]`);
+  if (col) {
+    col.classList.remove('is-refus');
+    void col.offsetWidth;              // force le redémarrage de l'animation
+    col.classList.add('is-refus');
+  }
+  const fb = $('#feedback');
+  fb.className = 'feedback rate';
+  fb.innerHTML = versLeHaut
+    ? "<strong>Refusé, c'est plus.</strong> Vise une échelle plus grande."
+    : "<strong>Refusé, c'est moins.</strong> Vise une échelle plus petite.";
+}
+
+function placerDansColonne(carte) {
   const contenu = document.querySelector(`.colonne[data-palier="${carte.palier}"] .col-contenu`);
   const el = document.createElement('div');
-  el.className = 'placee' + (juste ? '' : ' faux');
+  el.className = 'placee';
   el.dataset.wh = carte.wh;
   el.innerHTML = `
     <div class="placee-titre">${carte.titre}</div>
@@ -145,17 +166,11 @@ function placerDansColonne(carte, juste) {
   contenu.insertBefore(el, suivant || null);
 }
 
-function afficherFeedback(carte, juste, ecart, iChoisi, iJuste) {
+function afficherFeedback(carte) {
+  const symbole = PALIERS.find((p) => p.id === carte.palier).symbole;
   const fb = $('#feedback');
-  fb.className = 'feedback ' + (juste ? 'ok' : 'rate');
-  if (juste) {
-    fb.innerHTML = `<strong>Bien vu.</strong> ${carte.traduction}`;
-    return;
-  }
-  const sens = iChoisi > iJuste ? 'trop haut' : 'trop bas';
-  const facteur = FACTEURS[Math.min(ecart, FACTEURS.length - 1)];
-  fb.innerHTML = `<strong>Raté, ${sens} de ${ecart} cran${ecart > 1 ? 's' : ''}.</strong> `
-    + `Tu t'es trompé d'un facteur ${facteur}. La carte est allée se ranger toute seule à sa place, en ${PALIERS[iJuste].symbole}.`;
+  fb.className = 'feedback ok';
+  fb.innerHTML = `<strong>Bien vu, c'était des ${symbole}.</strong> ${carte.traduction}`;
 }
 
 function revelation() {
@@ -227,7 +242,8 @@ function colonneSous(x, y) {
 function reset() {
   etat.file = melanger(CARTES);
   etat.justes = 0;
-  etat.ecart = 0;
+  etat.rates = 0;
+  etat.essais = 0;
   $('#feedback').className = 'feedback';
   $('#feedback').innerHTML = '';
   $('#revelation').hidden = true;
