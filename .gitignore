@@ -1,0 +1,11 @@
+# Docs de pilotage internes au vault : suivies par le vault, jamais poussées ici.
+CLAUDE.md
+AGENTS.md
+IDEA.md
+BRAINSTORMING.md
+SPECS.md
+PLAN.md
+JOURNAL.md
+.env
+
+.DS_Store

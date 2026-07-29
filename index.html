@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le comparateur — combien pèse une IA ?</title>
+<meta name="description" content="Activité de classe : ranger des ordres de grandeur de la consommation électrique de l'IA, puis estimer sa propre semaine numérique.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page-frame">
+
+  <header class="header-band">
+    <div>
+      <h1 class="page-title">Le comparateur</h1>
+      <p class="page-subtitle">Combien pèse une intelligence artificielle ?</p>
+    </div>
+    <span class="badge-seq">Module 6 · H2</span>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" role="tab" aria-selected="true" data-panel="panel-frise" id="tab-frise">1. Ranger les chiffres</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="panel-semaine" id="tab-semaine">2. Estime ta semaine</button>
+  </nav>
+
+  <!-- ============ ONGLET 1 ============ -->
+  <section class="panel is-active" id="panel-frise" role="tabpanel" aria-labelledby="tab-frise">
+
+    <div class="consigne">
+      <p><strong>La consigne.</strong> Chaque carte porte un chiffre réel, avec sa source. Range-la dans la bonne colonne : du wattheure, l'échelle d'un geste, au térawattheure, l'échelle d'un pays. <strong>D'une colonne à l'autre, on multiplie par mille.</strong></p>
+      <p class="consigne-aide">Les cartes arrivent une par une. Clique la colonne où tu la ranges, ou fais-la glisser jusque-là.</p>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-item"><span class="score-val" id="score-restantes">12</span><span class="score-lab">cartes en main</span></div>
+      <div class="score-item"><span class="score-val" id="score-justes">0</span><span class="score-lab">justes du premier coup</span></div>
+      <div class="score-item"><span class="score-val" id="score-ecart">0</span><span class="score-lab">crans d'erreur</span></div>
+      <button class="retro-btn-pill" id="btn-reset"><span class="label">Recommencer</span><span class="icon">↺</span></button>
+    </div>
+
+    <div class="pioche-zone">
+      <p class="section-label">La carte à placer</p>
+      <div id="pioche" class="pioche"></div>
+      <div id="feedback" class="feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="frise" id="frise"></div>
+
+    <div class="revelation" id="revelation" hidden>
+      <p class="section-label">La carte qu'on ne vous a pas donnée</p>
+      <h3 class="rev-titre" id="rev-titre"></h3>
+      <div class="rev-bornes">
+        <div class="rev-borne"><span class="rev-lab">Au chiffre de Google</span><span class="rev-val" id="rev-basse"></span></div>
+        <div class="rev-borne"><span class="rev-lab">Au chiffre de l'EPRI</span><span class="rev-val" id="rev-haute"></span></div>
+      </div>
+      <p class="rev-texte" id="rev-texte"></p>
+    </div>
+
+  </section>
+
+  <!-- ============ ONGLET 2 ============ -->
+  <section class="panel" id="panel-semaine" role="tabpanel" aria-labelledby="tab-semaine" hidden>
+
+    <div class="consigne">
+      <p><strong>La consigne.</strong> Compte tes usages d'une semaine ordinaire. L'app calcule avec <strong>les deux chiffres à la fois</strong> : celui que les entreprises annoncent, et celui que les chercheurs indépendants estiment. L'écart entre les deux ne se referme jamais, et c'est une information.</p>
+    </div>
+
+    <div class="simu">
+      <div class="curseurs" id="curseurs"></div>
+
+      <div class="resultats">
+        <p class="section-label">Ce que ça fait</p>
+
+        <div class="res-bloc">
+          <span class="res-lab">Ta semaine</span>
+          <span class="res-val" id="res-semaine">—</span>
+        </div>
+        <div class="res-bloc">
+          <span class="res-lab">Ton année scolaire (40 semaines)</span>
+          <span class="res-val" id="res-annee">—</span>
+        </div>
+
+        <div class="res-trad">
+          <p><span id="trad-tel">—</span> charges de smartphone sur l'année.</p>
+          <p><span id="trad-lessive">—</span> machines à laver.</p>
+        </div>
+        <p class="res-dominant" id="res-dominant">—</p>
+
+        <p class="section-label">Multiplié par</p>
+        <div class="groupes" id="groupes"></div>
+        <label class="perso-wrap">Ou un nombre de personnes au choix :
+          <input type="number" id="perso" min="1" max="12000000" value="600" inputmode="numeric">
+        </label>
+
+        <div class="res-bloc res-bloc--fort">
+          <span class="res-lab" id="res-groupe-lab">Mon école, sur une année</span>
+          <span class="res-val" id="res-groupe">—</span>
+        </div>
+        <p class="res-compar" id="res-compar">—</p>
+      </div>
+    </div>
+
+    <div class="garde-fou">
+      <p><strong>Ce que ce calcul ne dit pas.</strong> Il ne dit pas que poser une question à une IA est un crime écologique : une requête pèse l'équivalent de deux minutes d'ampoule. Il dit qu'un geste minuscule, multiplié par des centaines de millions de personnes, jour et nuit, cesse d'être minuscule. On apprend l'échelle, pas la culpabilité.</p>
+    </div>
+
+  </section>
+
+  <footer class="sources-foot">
+    <p class="section-label">Toutes les sources</p>
+    <ul id="liste-sources"></ul>
+    <p class="foot-note">Chiffres vérifiés en juillet 2026. Les ordres de grandeur de l'IA bougent vite : à revérifier chaque rentrée.</p>
+  </footer>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
