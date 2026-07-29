@@ -271,9 +271,10 @@ function construireGroupes() {
   GROUPES.forEach((g) => {
     const btn = document.createElement('button');
     btn.className = 'groupe-btn' + (g.n === groupeActif ? ' is-active' : '');
-    btn.textContent = `${g.label} (${nf(g.n)})`;
+    btn.innerHTML = `${g.label}<span class="groupe-nb">${g.court}</span>`;
+    btn.title = g.source ? `${g.detail} : ${g.source}` : '';
     btn.dataset.n = g.n;
-    btn.dataset.label = g.label;
+    btn.dataset.label = g.detail ? `${g.label}, ${g.detail}` : g.label;
     btn.addEventListener('click', () => {
       groupeActif = g.n;
       $('#perso').value = g.n;
@@ -320,11 +321,30 @@ function calculer() {
   $('#res-groupe-lab').textContent = (label ? label.dataset.label : `${nf(groupeActif)} personnes`) + ', sur une année';
   $('#res-groupe').textContent = intervalle(gBasse, gHaute);
 
-  const menagesBasse = gBasse / MENAGE_BELGE_WH;
-  const menagesHaute = gHaute / MENAGE_BELGE_WH;
-  $('#res-compar').textContent = menagesHaute < 1
-    ? `Soit moins que la consommation annuelle d'un seul ménage belge. À votre échelle, l'usage reste petit : ce sont les 900 milliards de prompts par an du monde entier qui font la différence.`
-    : `Soit l'électricité annuelle de ${intervalleNb(menagesBasse, menagesHaute)} ménage(s) belge(s). L'écart entre les deux bornes ne se referme pas : c'est le désaccord entre les entreprises et les chercheurs, reporté sur ton usage à toi.`;
+  $('#res-compar').textContent = comparer(gBasse, gHaute);
+}
+
+/** Ramène un total à une échelle que l'élève a déjà rencontrée en onglet 1 :
+    le ménage belge tant que c'est petit, la Belgique entière quand ça devient grand. */
+function comparer(basse, haute) {
+  if (haute / MENAGE_BELGE_WH < 1) {
+    return "Soit moins que la consommation annuelle d'un seul ménage belge. "
+      + "À votre échelle, l'usage reste petit : ce sont les 900 milliards de prompts par an du monde entier qui font la différence.";
+  }
+  if (haute >= 0.01 * BELGIQUE_AN_WH) {
+    const rb = basse / BELGIQUE_AN_WH;
+    const rh = haute / BELGIQUE_AN_WH;
+    const pct = (r) => nf(r * 100, r < 0.1 ? 1 : 0) + ' %';
+    const fois = (r) => nf(r, r < 10 ? 1 : 0);
+    const belge = "toute l'électricité consommée en Belgique en un an";
+    let phrase;
+    if (rh < 1) phrase = `Soit ${pct(rb)} à ${pct(rh)} de ${belge}.`;
+    else if (rb >= 1) phrase = `Soit ${fois(rb)} à ${fois(rh)} fois ${belge}.`;
+    else phrase = `Soit entre ${pct(rb)} et ${fois(rh)} fois ${belge}.`;
+    return phrase + " Le geste de chacun n'a pas changé : seul le nombre de personnes a changé.";
+  }
+  return `Soit l'électricité annuelle de ${intervalleNb(basse / MENAGE_BELGE_WH, haute / MENAGE_BELGE_WH)} ménages belges. `
+    + "L'écart entre les deux bornes ne se referme pas : c'est le désaccord entre les entreprises et les chercheurs, reporté sur ton usage à toi.";
 }
 
 /** Le poste le plus lourd du total : c'est la hiérarchie qui s'apprend, pas le total. */

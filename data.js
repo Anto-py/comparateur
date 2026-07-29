@@ -213,11 +213,44 @@ const USAGES = [
   { id: 'videos', label: 'Vidéos IA de 5 secondes', unite: 'par semaine', defaut: 0, max: 50, basse: 944, haute: 944 },
 ];
 
+/* Les trois derniers groupes comptent les personnes de plus de 13 ans, c'est-à-dire
+   celles en âge d'ouvrir un compte sur la plupart des services d'IA.
+   Méthode : population totale × part des plus de 13 ans, cette part étant obtenue
+   en retirant les 0-12 ans, eux-mêmes interpolés depuis la tranche 0-14 ans publiée
+   (0-12 ≈ 0-14 × 13/15). C'est une estimation assumée, pas un recensement. */
 const GROUPES = [
-  { id: 'moi', label: 'Moi seul', n: 1 },
-  { id: 'classe', label: 'Ma classe', n: 20 },
-  { id: 'ecole', label: 'Mon école', n: 600 },
+  { id: 'moi', label: 'Moi seul', court: '1', n: 1 },
+  { id: 'classe', label: 'Ma classe', court: '20', n: 20 },
+  { id: 'ecole', label: 'Mon école', court: '600', n: 600 },
+  {
+    id: 'pays',
+    label: 'Mon pays',
+    detail: 'la Belgique',
+    court: '10,2 millions',
+    n: 10170000,
+    source: '11 825 551 habitants au 1er janvier 2025 (Statbel), dont 16,1 % de 0-14 ans (Eurostat)',
+  },
+  {
+    id: 'continent',
+    label: 'Mon continent',
+    detail: "l'Union européenne",
+    court: '387 millions',
+    n: 387000000,
+    source: '450,4 millions d\'habitants au 1er janvier 2025 (Eurostat)',
+  },
+  {
+    id: 'planete',
+    label: 'Ma planète',
+    detail: 'le monde entier',
+    court: '6,5 milliards',
+    n: 6520000000,
+    source: '8,3 milliards d\'habitants en 2026 (ONU), dont 24,7 % de 0-14 ans (Banque mondiale)',
+  },
 ];
+
+/* Repère d'échelle pour les grands totaux : toute l'électricité consommée en Belgique
+   en 2024, soit 80,5 TWh (Elia, bilan du 2 janvier 2025). */
+const BELGIQUE_AN_WH = 8.05e13;
 
 const LABELS_STATUT = {
   mesure: { texte: 'Mesuré et relu', classe: 'st-mesure' },

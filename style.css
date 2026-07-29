@@ -365,6 +365,22 @@ input[type=range] { width: 100%; margin-top: 8px; accent-color: var(--retro-oran
   cursor: pointer;
 }
 .groupe-btn.is-active { background: var(--retro-jaune); color: var(--retro-ink); }
+.groupe-nb {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+  opacity: 0.85;
+  margin-top: 1px;
+}
+.groupes-note {
+  font-size: 0.74rem;
+  color: rgba(242,239,230,0.7);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
 .perso-wrap { display: block; font-size: 0.78rem; color: rgba(242,239,230,0.8); margin-bottom: 14px; }
 .perso-wrap input {
   display: block;
