@@ -52,19 +52,6 @@ body {
   font-size: 0.95rem;
   margin-top: 6px;
 }
-.badge-seq {
-  font-family: 'Oswald', sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  background: var(--retro-teal);
-  color: var(--retro-paper);
-  padding: 6px 16px;
-  border-radius: 50px;
-  white-space: nowrap;
-}
-
 /* ---------- Onglets ---------- */
 .tabs { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
 .tab {
