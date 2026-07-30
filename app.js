@@ -34,8 +34,9 @@ function lienExterne(url, texte, titre) {
     + `${echapper(texte)}<span class="lien-fleche" aria-hidden="true">↗</span></a>`;
 }
 
-/** Les lignes de provenance d'une carte : la source, ce qu'on ne peut pas ouvrir, et l'approfondissement.
-    Une carte sans source affiche pourquoi : le trou dans les chiffres fait partie de ce qui s'enseigne. */
+/** Les lignes de provenance de la carte finale : la source, ce qu'on ne peut pas ouvrir,
+    et l'approfondissement. Elle dit pourquoi il n'y a rien à ouvrir : le trou dans les
+    chiffres fait partie de ce qui s'enseigne, et elle ne figure pas dans la liste du pied de page. */
 function lignesSource(o) {
   let html = '';
   if (o.source) {
@@ -108,7 +109,7 @@ function construireFrise() {
     // le même geste compterait deux dépôts.
     col.addEventListener('click', (ev) => {
       if (etat.vientDeGlisser) return;
-      // Les cartes déjà rangées vivent dans la colonne : consulter leur source
+      // Les repères d'échelle en tête de colonne portent des liens : les ouvrir
       // est une lecture, pas un dépôt.
       if (ev.target.closest('a')) return;
       deposer(p.id);
@@ -224,8 +225,10 @@ function placerDansColonne(carte) {
     <div class="placee-titre">${carte.titre}</div>
     <div class="placee-valeur">${carte.valeur}</div>
     <p class="placee-trad">${carte.traduction}</p>
-    <p class="placee-reserve">${carte.reserve}</p>
-    ${lignesSource(carte)}`;
+    <p class="placee-reserve">${carte.reserve}</p>`;
+  // La provenance ne s'affiche pas ici : elle vit une seule fois, dans la liste
+  // du pied de page, qui reprend les treize cartes. Deux fois le même lien
+  // encombrerait la colonne sans rien apprendre de plus.
 
   // On insère au bon rang pour que la colonne reste ordonnée du plus petit au plus grand.
   const voisins = Array.from(contenu.children);
@@ -486,10 +489,11 @@ function listerSources() {
     if (vues.has(c.source)) return;
     vues.add(c.source);
     const li = document.createElement('li');
-    // Sans lien, on le dit : une ligne muette passerait pour un oubli du site.
+    // Sans lien, on dit pourquoi : une ligne muette passerait pour un oubli du site,
+    // alors que l'absence de source est l'un des contenus du module.
     const provenance = c.lien
       ? lienExterne(c.lien.url, c.source, 'Ouvrir ' + c.lien.quoi)
-      : `${echapper(c.source)} <em class="src-muette">(rien à ouvrir)</em>`;
+      : `${echapper(c.source)} <em class="src-muette">${echapper(c.sans_lien || 'rien à ouvrir')}</em>`;
     const suite = c.plus ? ` · ${lienExterne(c.plus.url, 'pour aller plus loin', 'Ouvrir ' + c.plus.quoi)}` : '';
     li.innerHTML = `<strong>${echapper(c.titre)}</strong> — ${provenance}${suite}`;
     ul.appendChild(li);
