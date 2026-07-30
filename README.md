@@ -21,4 +21,6 @@ Fonctionne au clic comme au doigt, sur ordinateur, tablette et téléphone.
 
 ## Sources
 
-Tous les chiffres sont sourcés dans l'application elle-même et rassemblés en pied de page. Ils ont été vérifiés en juillet 2026 et bougent vite : à revérifier chaque rentrée. Un seul fichier à modifier pour cela, `data.js`.
+Tous les chiffres sont sourcés dans l'application elle-même et rassemblés en pied de page. Chaque source est un **lien cliquable** vers le document d'origine, doublé d'un lien « pour aller plus loin » vers la publication complète quand elle existe. Trois cartes n'ont rien à ouvrir, parce que le chiffre est un calcul de l'activité ou parce que l'entreprise ne l'a jamais publié : elles le disent au lieu de le taire.
+
+Les chiffres ont été vérifiés en juillet 2026 et bougent vite : à revérifier chaque rentrée. Un seul fichier à modifier pour cela, `data.js`. Le détail de la vérification, source par source, est dans `SOURCES.md`.

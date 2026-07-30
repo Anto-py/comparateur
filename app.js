@@ -19,6 +19,35 @@ const MENAGE_BELGE_WH = 3.5e6;   // 3 500 kWh par an
 const CHARGE_TEL_WH   = 15;
 const LESSIVE_WH      = 800;
 
+/* ============ Les liens vers les sources ============ */
+
+/** Neutralise ce qui, dans une donnée, serait lu comme du HTML. */
+function echapper(texte) {
+  const table = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(texte).replace(/[&<>"']/g, (c) => table[c]);
+}
+
+/** Un lien de source : nouvel onglet, jamais nu, toujours signalé par sa flèche. */
+function lienExterne(url, texte, titre) {
+  const attrTitre = titre ? ` title="${echapper(titre)}"` : '';
+  return `<a class="lien-src" href="${echapper(url)}" target="_blank" rel="noopener noreferrer"${attrTitre}>`
+    + `${echapper(texte)}<span class="lien-fleche" aria-hidden="true">↗</span></a>`;
+}
+
+/** Les lignes de provenance d'une carte : la source, ce qu'on ne peut pas ouvrir, et l'approfondissement.
+    Une carte sans source affiche pourquoi : le trou dans les chiffres fait partie de ce qui s'enseigne. */
+function lignesSource(o) {
+  let html = '';
+  if (o.source) {
+    html += o.lien
+      ? `<p class="placee-src">Source : ${lienExterne(o.lien.url, o.source, 'Ouvrir ' + o.lien.quoi)}</p>`
+      : `<p class="placee-src">Source : ${echapper(o.source)}</p>`;
+  }
+  if (o.sans_lien) html += `<p class="placee-sans-lien">${echapper(o.sans_lien)}</p>`;
+  if (o.plus) html += `<p class="placee-plus">Pour aller plus loin : ${lienExterne(o.plus.url, o.plus.quoi)}</p>`;
+  return html;
+}
+
 /* ============ Onglets ============ */
 
 document.querySelectorAll('.tab').forEach((tab) => {
@@ -52,6 +81,14 @@ function melanger(tableau) {
   return t;
 }
 
+/** Un repère d'échelle en tête de colonne. Ceux qui viennent d'une source réelle
+    la portent ; les autres sont des ordres de grandeur d'usage, et n'en inventent pas. */
+function repere(r) {
+  return r.lien
+    ? `<li>${echapper(r.texte)} ${lienExterne(r.lien.url, 'source', 'Ouvrir ' + r.lien.quoi)}</li>`
+    : `<li>${echapper(r.texte)}</li>`;
+}
+
 function construireFrise() {
   const frise = $('#frise');
   frise.innerHTML = '';
@@ -63,14 +100,17 @@ function construireFrise() {
       <div class="col-tete">
         <div class="col-symbole">${p.symbole}</div>
         <div class="col-intitule">${p.intitule}</div>
-        <ul class="col-reperes">${p.reperes.map((r) => `<li>${r}</li>`).join('')}</ul>
+        <ul class="col-reperes">${p.reperes.map(repere).join('')}</ul>
       </div>
       ${i > 0 ? '<div class="col-facteur">× 1 000</div>' : ''}
       <div class="col-contenu"></div>`;
     // Un glisser-déposer est suivi d'un clic synthétique : sans ce garde-fou,
     // le même geste compterait deux dépôts.
-    col.addEventListener('click', () => {
+    col.addEventListener('click', (ev) => {
       if (etat.vientDeGlisser) return;
+      // Les cartes déjà rangées vivent dans la colonne : consulter leur source
+      // est une lecture, pas un dépôt.
+      if (ev.target.closest('a')) return;
       deposer(p.id);
     });
     frise.appendChild(col);
@@ -184,8 +224,8 @@ function placerDansColonne(carte) {
     <div class="placee-titre">${carte.titre}</div>
     <div class="placee-valeur">${carte.valeur}</div>
     <p class="placee-trad">${carte.traduction}</p>
-    <p class="placee-src">Source : ${carte.source}</p>
-    <p class="placee-reserve">${carte.reserve}</p>`;
+    <p class="placee-reserve">${carte.reserve}</p>
+    ${lignesSource(carte)}`;
 
   // On insère au bon rang pour que la colonne reste ordonnée du plus petit au plus grand.
   const voisins = Array.from(contenu.children);
@@ -208,6 +248,7 @@ function revelation() {
   $('#rev-basse').textContent = CARTE_FINALE.basse;
   $('#rev-haute').textContent = CARTE_FINALE.haute;
   $('#rev-texte').textContent = CARTE_FINALE.texte;
+  $('#rev-sources').innerHTML = lignesSource(CARTE_FINALE);
   box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -445,7 +486,12 @@ function listerSources() {
     if (vues.has(c.source)) return;
     vues.add(c.source);
     const li = document.createElement('li');
-    li.innerHTML = `<strong>${c.titre}</strong> — ${c.source}`;
+    // Sans lien, on le dit : une ligne muette passerait pour un oubli du site.
+    const provenance = c.lien
+      ? lienExterne(c.lien.url, c.source, 'Ouvrir ' + c.lien.quoi)
+      : `${echapper(c.source)} <em class="src-muette">(rien à ouvrir)</em>`;
+    const suite = c.plus ? ` · ${lienExterne(c.plus.url, 'pour aller plus loin', 'Ouvrir ' + c.plus.quoi)}` : '';
+    li.innerHTML = `<strong>${echapper(c.titre)}</strong> — ${provenance}${suite}`;
     ul.appendChild(li);
   });
 }

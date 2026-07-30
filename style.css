@@ -363,6 +363,15 @@ body {
 .placee-valeur { font-family: 'Anton', sans-serif; color: var(--retro-orange); font-size: 0.95rem; margin-top: 2px; }
 .placee-trad { margin-top: 4px; color: rgba(13,22,23,0.8); line-height: 1.35; }
 .placee-src { margin-top: 5px; font-size: 0.66rem; font-style: italic; color: rgba(13,22,23,0.62); }
+.placee-plus { margin-top: 4px; font-size: 0.64rem; color: rgba(13,22,23,0.6); line-height: 1.35; }
+.placee-sans-lien {
+  margin-top: 5px;
+  font-size: 0.64rem;
+  color: rgba(13,22,23,0.72);
+  border-left: 3px solid rgba(13,22,23,0.35);
+  padding-left: 6px;
+  line-height: 1.35;
+}
 .placee-reserve {
   margin-top: 5px;
   font-size: 0.68rem;
@@ -371,6 +380,21 @@ body {
   padding: 5px 7px;
   line-height: 1.35;
 }
+
+/* ---------- Liens vers les sources ---------- */
+/* Le lien doit rester attrapable au doigt alors que le texte de source est petit :
+   d'où la zone cliquable étendue vers le bas et la flèche collée au texte. */
+.lien-src {
+  color: var(--retro-teal);
+  font-style: normal;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(18,118,118,0.45);
+  padding-bottom: 2px;
+}
+.lien-src:hover { border-bottom-color: var(--retro-orange); color: var(--retro-orange); }
+.lien-src:focus-visible { outline: 3px solid var(--retro-jaune); outline-offset: 2px; border-radius: 2px; }
+.lien-fleche { margin-left: 3px; font-size: 0.85em; }
 
 /* ---------- Révélation ---------- */
 .revelation {
@@ -388,6 +412,13 @@ body {
 .rev-lab { font-family: 'Oswald', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(242,239,230,0.7); }
 .rev-val { font-family: 'Anton', sans-serif; font-size: 1.6rem; color: var(--retro-orange); line-height: 1.2; }
 .rev-texte { font-size: 0.92rem; color: rgba(242,239,230,0.88); }
+.rev-sources { margin-top: 14px; }
+.rev-sources .placee-src,
+.rev-sources .placee-plus,
+.rev-sources .placee-sans-lien { color: rgba(242,239,230,0.72); font-size: 0.76rem; }
+.rev-sources .placee-sans-lien { border-left-color: rgba(242,239,230,0.4); }
+.rev-sources .lien-src { color: var(--retro-jaune); border-bottom-color: rgba(227,165,53,0.5); }
+.rev-sources .lien-src:hover { color: var(--retro-orange); border-bottom-color: var(--retro-orange); }
 
 /* ---------- Simulateur ---------- */
 .simu { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
@@ -468,6 +499,7 @@ input[type=range] { width: 100%; margin-top: 8px; accent-color: var(--retro-oran
 .sources-foot { margin-top: 40px; padding-top: 18px; border-top: 3px solid var(--retro-teal); }
 .sources-foot ul { list-style: none; font-size: 0.78rem; color: rgba(13,22,23,0.78); }
 .sources-foot li { padding: 3px 0; }
+.sources-foot .src-muette { color: rgba(13,22,23,0.5); }
 .sources-foot li strong { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.04em; }
 .foot-note { margin-top: 10px; font-size: 0.74rem; font-style: italic; color: rgba(13,22,23,0.6); }
 
