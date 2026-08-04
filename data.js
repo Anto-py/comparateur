@@ -192,8 +192,8 @@ const CARTES = [
   {
     id: 'gpt3',
     titre: 'Entraîner GPT-3, une seule fois',
-    nombre: '1 287',
-    valeur: '1 287 MWh, soit 1,3 GWh, et 552 tonnes de CO₂',
+    nombre: '1,3',
+    valeur: '1,3 GWh, et 552 tonnes de CO₂',
     wh: 1.287e9,
     palier: 'gwh',
     traduction: "L'électricité de 370 ménages belges pendant un an. Le CO₂ d'environ 550 allers-retours Paris-New York en avion.",
@@ -206,8 +206,8 @@ const CARTES = [
   {
     id: 'gpt4',
     titre: 'Entraîner GPT-4',
-    nombre: '50 000',
-    valeur: '50 000 MWh, soit 50 GWh',
+    nombre: '50',
+    valeur: '50 GWh',
     wh: 5e10,
     palier: 'gwh',
     traduction: "L'électricité de 14 000 ménages belges pendant un an, plus que tous les ménages de Saint-Ghislain.",
