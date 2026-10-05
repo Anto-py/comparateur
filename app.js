@@ -136,6 +136,8 @@ function afficherPioche() {
   nettoyerGlisser();
   pioche.innerHTML = '';
   const carte = carteCourante();
+  // Sans carte à placer, la pioche n'a plus de raison de rester collée en haut de l'écran.
+  pioche.parentElement.classList.toggle('is-vide', !carte);
 
   if (!carte) {
     majScore();
@@ -301,14 +303,87 @@ window.addEventListener('pointermove', (ev) => {
     document.body.appendChild(f);
     glisse.el.style.opacity = '0.35';
     glisse.fantome = f;
+    defilerAuBord(glisse);
   }
+  glisse.px = ev.clientX;
+  glisse.py = ev.clientY;
   glisse.fantome.style.left = (ev.clientX - 60) + 'px';
   glisse.fantome.style.top = (ev.clientY - 30) + 'px';
-
-  document.querySelectorAll('.colonne').forEach((c) => c.classList.remove('is-target'));
-  const cible = colonneSous(ev.clientX, ev.clientY);
-  if (cible) cible.classList.add('is-target');
+  viser(ev.clientX, ev.clientY);
 });
+
+/** Allume la colonne qui se trouve sous le doigt, et elle seule. */
+function viser(x, y) {
+  document.querySelectorAll('.colonne.is-target').forEach((c) => c.classList.remove('is-target'));
+  const cible = colonneSous(x, y);
+  if (cible) cible.classList.add('is-target');
+}
+
+/* Défilement automatique aux bords de l'écran.
+   La carte porte touch-action: none, sans quoi le doigt ferait défiler la page au
+   lieu de saisir la carte. La contrepartie : plus rien ne défile pendant le geste,
+   et les colonnes hors champ sont hors d'atteinte. Tant que le doigt reste près du
+   bord haut ou bas, on fait donc défiler la page nous-mêmes, d'autant plus vite
+   qu'il s'en approche. Le clone, en position fixed, ne bouge pas sous le doigt. */
+const BORD = 64;            // px : épaisseur de la bande active, en haut et en bas
+const VITESSE_MAX = 900;    // px par seconde, au plus près du bord
+
+function defilerAuBord(g) {
+  const zone = $('.pioche-zone');
+  const frise = $('#frise');
+  const collante = getComputedStyle(zone).position === 'sticky';
+  let avant = performance.now();
+  let reliquat = 0;          // fraction de pixel reportée d'une image à la suivante
+
+  /** Où en est un point de hauteur y par rapport aux deux bandes actives. */
+  function bandes(y) {
+    // Collée, la pioche masque le haut de la frise : le bord utile est son bord bas.
+    const haut = collante ? Math.max(0, zone.getBoundingClientRect().bottom) : 0;
+    const bas = window.innerHeight;
+    return {
+      haut,
+      bas,
+      versHaut: (haut + BORD - y) / BORD,      // positif dans la bande du haut
+      versBas: (y - (bas - BORD)) / BORD,      // positif dans la bande du bas
+    };
+  }
+
+  // La bande où le geste a démarré n'agit qu'une fois quittée : la carte se saisit
+  // dans la pioche, donc tout en haut quand elle est collée, et la prendre ne doit
+  // pas faire remonter la page.
+  const depart = bandes(g.y);
+  let hautArme = depart.versHaut <= 0;
+  let basArme = depart.versBas <= 0;
+
+  function image(maintenant) {
+    if (glisse !== g) return;            // geste fini ou remplacé : la boucle s'éteint seule
+    const dt = Math.min(maintenant - avant, 50) / 1000;
+    avant = maintenant;
+
+    const { haut, bas, versHaut, versBas } = bandes(g.py);
+    if (versHaut <= 0) hautArme = true;
+    if (versBas <= 0) basArme = true;
+
+    // On s'arrête aux limites de la frise : au-delà, il n'y a plus de colonne à viser.
+    const r = frise.getBoundingClientRect();
+    let pas = 0;
+    if (versBas > 0 && basArme) {
+      pas = Math.max(0, Math.min(VITESSE_MAX * Math.min(versBas, 1) * dt, r.bottom - (bas - BORD)));
+    } else if (versHaut > 0 && hautArme) {
+      pas = -Math.max(0, Math.min(VITESSE_MAX * Math.min(versHaut, 1) * dt, haut - r.top));
+    }
+
+    reliquat = pas ? reliquat + pas : 0;
+    const entier = Math.trunc(reliquat);
+    if (entier) {
+      reliquat -= entier;
+      window.scrollBy(0, entier);
+      viser(g.px, g.py);                 // la page a bougé sous un doigt immobile
+    }
+    requestAnimationFrame(image);
+  }
+  requestAnimationFrame(image);
+}
 
 window.addEventListener('pointerup', (ev) => {
   if (!glisse || ev.pointerId !== glisse.id) return;
